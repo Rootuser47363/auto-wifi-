@@ -1,6 +1,7 @@
+
 Auto-Wifi
 Este script de PowerShell permite obtener y guardar en un archivo de texto las contraseñas de las redes wifi a las que ha accedido previamente un equipo con Windows.
-
+Este script está en face beta y está inspirado en el siguiente sript 
 Requisitos
 PowerShell 3.0 o posterior.
 Windows.
