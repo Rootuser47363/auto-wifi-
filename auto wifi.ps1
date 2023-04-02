@@ -12,6 +12,19 @@ if (-not (Test-Path -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion"))
 # Cambiar el nombre del archivo de salida aquí:
 $nombre_archivo = "Auto-wifi.txt"
 
+# Verificar si el archivo de salida ya existe y pedir confirmación antes de sobrescribirlo
+if (Test-Path -Path $nombre_archivo) {
+    $confirm = Read-Host "El archivo $nombre_archivo ya existe. ¿Desea sobrescribirlo? (S/N)"
+    if ($confirm -ne 'S') {
+        Write-Host "Operación cancelada." -ForegroundColor Yellow
+        return
+    }
+    else {
+        # Leer las contraseñas ya existentes en el archivo y guardarlas en una variable
+        $contrasenas_existentes = Get-Content $nombre_archivo
+    }
+}
+
 # Ejecutar el comando netsh para obtener las contraseñas y guardarlas en una variable
 $redes_wifi = netsh wlan show profile
 $contrasenas_wifi = foreach ($red in $redes_wifi) {
@@ -22,21 +35,18 @@ $contrasenas_wifi = foreach ($red in $redes_wifi) {
     }
 }
 
-# Ordenar las contraseñas alfabéticamente por nombre de red
-$contrasenas_wifi = $contrasenas_wifi | Sort-Object
-
-# Verificar si el archivo de salida ya existe y pedir confirmación antes de sobrescribirlo
-if (Test-Path -Path $nombre_archivo) {
-    $confirm = Read-Host "El archivo $nombre_archivo ya existe. ¿Desea sobrescribirlo? (S/N)"
-    if ($confirm -ne 'S') {
-        Write-Host "Operación cancelada." -ForegroundColor Yellow
-        return
-    } 
+# Combinar las contraseñas ya existentes con las nuevas, y ordenarlas alfabéticamente por nombre de red
+if ($contrasenas_existentes) {
+    $todas_contraseñas = $contrasenas_existentes + $contrasenas_wifi
+    $todas_contraseñas = $todas_contraseñas | Sort-Object
+}
+else {
+    $todas_contraseñas = $contrasenas_wifi | Sort-Object
 }
 
-# Escribir las contraseñas ordenadas en el archivo de salida
+# Escribir todas las contraseñas en el archivo de salida
 try {
-    $contrasenas_wifi | Out-File -FilePath $nombre_archivo -Encoding utf8
+    $todas_contraseñas | Out-File -FilePath $nombre_archivo -Encoding utf8
     Write-Host "Contraseñas guardadas exitosamente en $nombre_archivo"
 } catch {
     Write-Host "Error al escribir en el archivo: $($_.Exception.Message)" -ForegroundColor Red
