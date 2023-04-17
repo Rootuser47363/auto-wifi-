@@ -25,13 +25,15 @@ if (Test-Path -Path $nombre_archivo) {
     }
 }
 
-# Ejecutar el comando netsh para obtener las contraseñas y guardarlas en una variable
+# Ejecutar el comando netsh para obtener la información de las redes WiFi y guardarlas en una variable
 $redes_wifi = netsh wlan show profile
 $contrasenas_wifi = foreach ($red in $redes_wifi) {
     $nombre_red = $red -replace ".:\s(.*)", '$1'
-    $contrasena_red = (netsh wlan show profile name="$nombre_red" key=clear | Select-String "Contenido de la clave" | ForEach-Object { $_.ToString().Split(":")[1].Trim() }) -join ''
+    $info_red = netsh wlan show profile name="$nombre_red"
+    $contrasena_red = ( $info_red | Select-String "Contenido de la clave" | ForEach-Object { $_.ToString().Split(":")[1].Trim() }) -join ''
+    $tipo_seguridad = ( $info_red | Select-String "Tipo de seguridad" | ForEach-Object { $_.ToString().Split(":")[1].Trim() }) -join ''
     if ($contrasena_red) {
-        "${nombre_red}: ${contrasena_red}"
+        "${nombre_red}: ${contrasena_red} (Seguridad: ${tipo_seguridad})"
     }
 }
 
