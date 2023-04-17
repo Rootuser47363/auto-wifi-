@@ -1,55 +1,28 @@
-# Verifica la versión de PowerShell y que se está ejecutando en un equipo con Windows
-if ($PSVersionTable.PSVersion.Major -lt 3) {
-    Write-Host "Este script requiere PowerShell 3.0 o posterior." -ForegroundColor Red
-    return
-}
+# Auto-Wifi
 
-if (-not (Test-Path -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion")) {
-    Write-Host "Este script solo se puede ejecutar en un equipo con Windows." -ForegroundColor Red
-    return
-}
+Este script de PowerShell permite obtener y guardar en un archivo de texto las contraseñas de las redes wifi a las que ha accedido previamente un equipo con Windows. Es una versión beta inspirada en este [script](https://github.com/Cedaleon/wifi-password.ps1). 
 
-# Cambiar el nombre del archivo de salida aquí:
-$nombre_archivo = "Auto-wifi.txt"
+## Requisitos
 
-# Verificar si el archivo de salida ya existe y pedir confirmación antes de sobrescribirlo
-if (Test-Path -Path $nombre_archivo) {
-    $confirm = Read-Host "El archivo $nombre_archivo ya existe. ¿Desea sobrescribirlo? (S/N)"
-    if ($confirm -ne 'S') {
-        Write-Host "Operación cancelada." -ForegroundColor Yellow
-        return
-    }
-    else {
-        # Leer las contraseñas ya existentes en el archivo y guardarlas en una variable
-        $contrasenas_existentes = Get-Content $nombre_archivo
-    }
-}
+- PowerShell 3.0 o posterior.
+- Windows.
 
-# Ejecutar el comando netsh para obtener la información de las redes WiFi y guardarlas en una variable
-$redes_wifi = netsh wlan show profile
-$contrasenas_wifi = foreach ($red in $redes_wifi) {
-    $nombre_red = $red -replace ".:\s(.*)", '$1'
-    $info_red = netsh wlan show profile name="$nombre_red"
-    $contrasena_red = ( $info_red | Select-String "Contenido de la clave" | ForEach-Object { $_.ToString().Split(":")[1].Trim() }) -join ''
-    $tipo_seguridad = ( $info_red | Select-String "Tipo de seguridad" | ForEach-Object { $_.ToString().Split(":")[1].Trim() }) -join ''
-    if ($contrasena_red) {
-        "${nombre_red}: ${contrasena_red} (Seguridad: ${tipo_seguridad})"
-    }
-}
+## Uso
 
-# Combinar las contraseñas ya existentes con las nuevas, y ordenarlas alfabéticamente por nombre de red
-if ($contrasenas_existentes) {
-    $todas_contraseñas = $contrasenas_existentes + $contrasenas_wifi
-    $todas_contraseñas = $todas_contraseñas | Sort-Object
-}
-else {
-    $todas_contraseñas = $contrasenas_wifi | Sort-Object
-}
+1. Descarga el archivo `auto-wifi.ps1`.
+2. Abre una ventana de PowerShell.
+3. Navega hasta la carpeta donde se encuentra el archivo `auto-wifi.ps1`.
+4. Ejecuta el script escribiendo en la terminal: `.\auto-wifi.ps1`.
+5. El script generará un archivo de texto en la misma carpeta donde se encuentra el archivo `auto-wifi.ps1` con el nombre "Auto-wifi.txt".
+6. Abre el archivo de texto para ver las contraseñas de las redes wifi guardadas.
 
-# Escribir todas las contraseñas en el archivo de salida
-try {
-    $todas_contraseñas | Out-File -FilePath $nombre_archivo -Encoding utf8
-    Write-Host "Contraseñas guardadas exitosamente en $nombre_archivo"
-} catch {
-    Write-Host "Error al escribir en el archivo: $($_.Exception.Message)" -ForegroundColor Red
-}
+## Advertencias
+
+- El script solo puede ejecutarse en equipos con Windows.
+- Este script muestra las contraseñas de las redes wifi guardadas en el equipo sin necesidad de autenticación, por lo que cualquier persona que tenga acceso al archivo de texto puede ver las contraseñas. Se recomienda mantener el archivo de texto en un lugar seguro y eliminarlo una vez se haya terminado de usar.
+
+## Contribuir
+
+Si deseas contribuir a este proyecto, por favor haz un pull request o crea un issue.
+
+**Palabras clave para motores de búsqueda:** PowerShell, Windows, contraseñas, wifi, script, seguridad.
