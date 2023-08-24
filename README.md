@@ -1,6 +1,6 @@
 # Auto-Wifi
 
-Este script de PowerShell permite obtener y guardar en un archivo de texto las contraseñas de las redes wifi a las que ha accedido previamente un equipo con Windows. Es una versión beta inspirada en este [script](https://github.com/Cedaleon/wifi-password.ps1). 
+Este script de PowerShell permite obtener y guardar en un archivo de texto las contraseñas de las redes wifi a las que ha accedido previamente un equipo con Windows. Es una versión beta inspirada en este de Cadeleon [script](https://github.com/Cedaleon/wifi-password.ps1). 
 
 ## Requisitos
 
